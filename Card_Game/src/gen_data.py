@@ -25,7 +25,7 @@ def compute_scores_from_seeds(seeds: np.ndarray, score_fn) -> np.ndarray:
     Supports score functions that return either:
       - a scalar (int/float), or
       - a NumPy array of any shape
-
+         
     Returns an array shaped as:
       - (len(seeds),)                 for scalar scores
       - (len(seeds), *score_shape)    for array scores
@@ -34,7 +34,7 @@ def compute_scores_from_seeds(seeds: np.ndarray, score_fn) -> np.ndarray:
     if n == 0:
         return np.array([], dtype=np.int16)
 
-    # Probe first result
+    #Probe first result
     first = score_fn(deck_from_seed(int(seeds[0])))
     if np.isscalar(first):
         out = np.empty(n, dtype=np.asarray(first).dtype)
