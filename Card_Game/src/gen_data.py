@@ -1,4 +1,7 @@
 import numpy as np
+import os
+from src.utils import time_and_size
+
 
 def generate_seeds(n: int, base_seed = 12345) -> np.ndarray:
     """
@@ -50,37 +53,40 @@ def compute_scores_from_seeds(seeds: np.ndarray, score_fn) -> np.ndarray:
             out[i] = np.asarray(score_fn(deck_from_seed(int(seeds[i]))))
         return out
 
-def score_humble_nishiyama(deck: np.ndarray) -> np.ndarray:
-    """
-    Scores 8x8 matrix of all valid player matchups (P1 != P2 only).
-    Each player picks a 3-card pattern (000 - 111), and the game is played by flipping the deck and scoring when a match occurs. 
-    Scores by tricks meaning a player gets one point per correct sequence matched. 
 
-    Returns:
-        scores[i, j] = Player 1's score when P1 picks pattern i, P2 picks j. (8x8 Matrix)
-        Diagonal values (i == j) are set to -1 (invalid).
-    """
-    assert deck.shape == (52,)
-    assert np.sum(deck) == 26
+def _data_dir() -> str:
+    base_dir = os.path.dirname(os.path.dirname(__file__))
+    data_dir = os.path.join(base_dir, "data")
+    os.makedirs(data_dir, exist_ok=True)
+    return data_dir
 
-    patterns = [np.array([int(b) for b in f"{i:03b}"]) for i in range(8)]
-    scores = np.full((8, 8), -1, dtype=np.int16)  # default all to invalid (-1)
 
-    for i, p1 in enumerate(patterns):
-        for j, p2 in enumerate(patterns):
-            if i == j:
-                continue  #skip same-pattern sequences as will always result in a tie
-            score = 0
-            idx = 0
-            while idx <= 49:  #last window: deck[49:52]. 
-                window = deck[idx:idx+3]
-                if np.array_equal(window, p1):
-                    score += 1
-                    idx += 3
-                elif np.array_equal(window, p2):
-                    idx += 3
-                else:
-                    idx += 1
+@time_and_size
+def save_seeds(seeds: np.ndarray, filename: str = "seeds.npy") -> str:
+    """Save seeds to Card_Game/data and return the saved path."""
+    path = os.path.join(_data_dir(), filename)
+    np.save(path, seeds)
+    return path
 
-            scores[i, j] = score
-    return scores
+
+def load_seeds(filename: str = "seeds.npy") -> np.ndarray:
+    """Load seeds from Card_Game/data and return the array."""
+    path = os.path.join(_data_dir(), filename)
+    return np.load(path)
+
+
+@time_and_size
+def save_scores(scores: np.ndarray, filename: str = "scores.npy") -> str:
+    """Save scores/matrices to Card_Game/data and return the saved path."""
+    path = os.path.join(_data_dir(), filename)
+    np.save(path, scores)
+    return path
+
+
+def load_scores(filename: str = "scores.npy") -> np.ndarray:
+    """Load scores/matrices from Card_Game/data and return the array."""
+    path = os.path.join(_data_dir(), filename)
+    return np.load(path)
+
+
+## score_humble_nishiyama moved to src/score_data.py; imported above for callers
