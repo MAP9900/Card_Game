@@ -21,14 +21,14 @@ def deck_from_seed(seed: int) -> np.ndarray:
 
 def compute_scores_from_seeds(seeds: np.ndarray, score_fn) -> np.ndarray:
     """
-    Rebuild each deck from seed and score it with `score_fn(deck)`.
+    Rebuilds each deck from the generated seeds and the applies a scoring function to the decks. 
     Supports score functions that return either:
       - a scalar (int/float), or
       - a NumPy array of any shape
          
     Returns an array shaped as:
-      - (len(seeds),)                 for scalar scores
-      - (len(seeds), *score_shape)    for array scores
+      - (len(seeds),) for scalar scores
+      - (len(seeds), *score_shape) for array scores
     """
     n = len(seeds)
     if n == 0:
@@ -53,12 +53,12 @@ def compute_scores_from_seeds(seeds: np.ndarray, score_fn) -> np.ndarray:
 def score_humble_nishiyama(deck: np.ndarray) -> np.ndarray:
     """
     Scores 8x8 matrix of all valid player matchups (P1 != P2 only).
-    Each player picks a 3-card pattern (000–111), and the game is
-    played by flipping the deck and scoring when a match occurs.
-    
+    Each player picks a 3-card pattern (000 - 111), and the game is played by flipping the deck and scoring when a match occurs. 
+    Scores by tricks meaning a player gets one point per correct sequence matched. 
+
     Returns:
-        scores[i, j] = Player 1's score when P1 picks pattern i, P2 picks j.
-                      Diagonal values (i == j) are set to -1 (invalid).
+        scores[i, j] = Player 1's score when P1 picks pattern i, P2 picks j. (8x8 Matrix)
+        Diagonal values (i == j) are set to -1 (invalid).
     """
     assert deck.shape == (52,)
     assert np.sum(deck) == 26
@@ -69,10 +69,10 @@ def score_humble_nishiyama(deck: np.ndarray) -> np.ndarray:
     for i, p1 in enumerate(patterns):
         for j, p2 in enumerate(patterns):
             if i == j:
-                continue  #skip same-pattern matchups
+                continue  #skip same-pattern sequences as will always result in a tie
             score = 0
             idx = 0
-            while idx <= 49:  #last window: deck[49:52]
+            while idx <= 49:  #last window: deck[49:52]. 
                 window = deck[idx:idx+3]
                 if np.array_equal(window, p1):
                     score += 1
