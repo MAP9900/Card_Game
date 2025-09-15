@@ -2,7 +2,7 @@ import numpy as np
 import os
 from src.gen_data import generate_seeds, compute_scores_from_seeds, save_seeds, load_seeds, save_scores,load_scores
 from src.score_data import score_humble_nishiyama
-from src.viz_data import save_hn_score_heatmap, save_p2_win_prob_heatmap, save_p2_win_prob_heatmap_from_mats
+from src.viz_data import save_hn_score_heatmap, save_p2_win_prob_heatmap_from_mats
 
 def simple_score(deck: np.ndarray) -> int:
     # Example: sum of the first 10 cards (varies by seed)
@@ -25,10 +25,6 @@ if __name__ == "__main__":
     # Single-deck HN score heatmap
     out1 = save_hn_score_heatmap(deck_seed=42)
     print(f"Saved score heatmap to: {out1}")
-
-    # Empirical P2 win probability heatmap (fresh compute)
-    out2 = save_p2_win_prob_heatmap(n_games=100, base_seed=2024)
-    print(f"Saved probability heatmap to: {out2}")
 
     # Full pipeline with caching: 1000 decks -> save seeds/scores -> viz from saved
     n = 1000

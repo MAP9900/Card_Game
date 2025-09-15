@@ -89,4 +89,4 @@ def load_scores(filename: str = "scores.npy") -> np.ndarray:
     return np.load(path)
 
 
-## score_humble_nishiyama moved to src/score_data.py; imported above for callers
+# score_humble_nishiyama moved to src/score_data.py. Now imported above

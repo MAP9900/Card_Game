@@ -1,7 +1,7 @@
 import os
 import time
 from functools import wraps
-from typing import Any, Callable, Iterable, Optional, Union
+from typing import Any, Callable, Union
 
 
 PathLike = Union[str, os.PathLike]
