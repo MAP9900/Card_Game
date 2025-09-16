@@ -51,3 +51,8 @@ if __name__ == "__main__":
 
     out3 = save_p2_win_prob_heatmap_from_mats(mats)
     print(f"Saved combined probability heatmap to: {out3}")
+
+
+
+
+#To Do: Clean up test.py/create run_tests.py, turn gen_data into a class, understand/clean up score_data, 
