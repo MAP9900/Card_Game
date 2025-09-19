@@ -9,7 +9,7 @@ PathLike = Union[str, os.PathLike]
 #Decorator for run times and file sizes
 def time_and_size(func: Callable[..., Any]) -> Callable[..., Any]:
     """
-    Minimal decorator: prints runtime and, if the function returns a path
+    Prints runtime and, if the function returns a path
     (or list/tuple of paths), prints the size of each file. Returns the
     function's original result unchanged.
     """
