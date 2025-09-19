@@ -14,9 +14,11 @@ from src.viz_data import save_hn_score_heatmap, save_p2_win_prob_heatmap_from_ma
 #     print("scores:", scores)
 
 
+#TO RUN: uv run python -m src.test
+
 if __name__ == "__main__":  
     #Test of 2 mil seeds
-    n = 50_000
+    n = 2_000_000
     seeds_file = f"seeds_{n}.npy"
     scores_file = f"scores_{n}.npy"
 
@@ -39,11 +41,12 @@ if __name__ == "__main__":
         mats = compute_scores_from_seeds(seeds_big, score_humble_nishiyama)
         save_scores(mats, scores_file)
 
-    # out3 = save_p2_win_prob_heatmap_from_mats(mats).  #Not needed for testing
+    #Not needed for testing
+    # out3 = save_p2_win_prob_heatmap_from_mats(mats). 
     # print(f"Saved combined probability heatmap to: {out3}")
 
 
-#MAP Test results 1 (Canceled Scoring as estimation)
+#MAP Test results 1 (Canceled to stop scoring as it would take hours...)
 
 # (base) matthewplambeck@Matthews-MacBook-Pro-2 Card_Game % uv run python -m src.test
 
@@ -79,11 +82,6 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-#To Do: Clean up test.py/create run_tests.py, turn gen_data into a class, understand/clean up score_data, 
+#To Do: Clean up test.py/create run_tests.py, turn gen_data into a class, 
 
 

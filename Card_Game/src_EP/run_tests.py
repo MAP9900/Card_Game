@@ -15,6 +15,8 @@ from gen_data import (
     save_scores,
 )
 
+#TO RUN: uv run python Card_Game/src_EP/run_tests.py 
+
 
 # ----------------------------
 # Benchmark utilities
