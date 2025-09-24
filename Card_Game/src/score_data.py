@@ -2,6 +2,8 @@ import numpy as np
 from typing import Tuple
 from src.gen_data import generate_seeds, deck_from_seed
 
+#TODO: Add way to count draws
+
 
 def _count_both(deck: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> Tuple[int, int]:
     """
