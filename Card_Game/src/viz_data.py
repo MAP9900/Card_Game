@@ -69,11 +69,11 @@ def save_p2_win_prob_heatmap_from_mats(mats: np.ndarray, out_dir: str | None = N
     if filename is None:
         filename = "humble_nishiyama_p2_win_prob_from_mats.png"
 
-    probs = p2_win_prob_from_mats(mats)
+    win_probs, tie_probs = p2_win_prob_from_mats(mats, return_ties=True)
     cmap = plt.cm.plasma.copy() #Color = plasma
     cmap.set_bad(color='lightgray')
     plt.figure(figsize=(6.5, 5.5))
-    im = plt.imshow(np.ma.masked_invalid(probs), vmin=0.0, vmax=1.0, cmap=cmap, interpolation='nearest')
+    im = plt.imshow(np.ma.masked_invalid(win_probs), vmin=0.0, vmax=1.0, cmap=cmap, interpolation='nearest')
     plt.colorbar(im, label='P2 win probability (per deck)')
     ticks = list(range(8))
     labels = [format(i, '03b') for i in range(8)]
@@ -84,11 +84,14 @@ def save_p2_win_prob_heatmap_from_mats(mats: np.ndarray, out_dir: str | None = N
     plt.title('Humble–Nishiyama P2 Win Probabilities (from saved scores)')
     for i in range(8):
         for j in range(8):
-            val = probs[i, j]
-            if i == j or np.isnan(val):
+            win_val = win_probs[i, j]
+            if i == j or np.isnan(win_val):
                 continue
             color = 'black' 
-            plt.text(j, i, f"{val:.2f}", ha='center', va='center', color=color, fontsize=8)
+            tie_val = tie_probs[i, j]
+            win_pct = int(round(win_val * 100))
+            tie_pct = int(round(tie_val * 100)) if not np.isnan(tie_val) else 0
+            plt.text(j, i, f"{win_pct}({tie_pct})", ha='center', va='center', color=color, fontsize=8)
     out_path = os.path.join(out_dir, filename)
     plt.tight_layout()
     plt.savefig(out_path, dpi=150)

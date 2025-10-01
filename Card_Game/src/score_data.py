@@ -151,7 +151,8 @@ def p2_win_prob_row(p1_index: int, n_games: int = 100, base_seed: int = 2024) ->
     return row
 
 
-def p2_win_prob_from_mats(mats: np.ndarray) -> np.ndarray:
+def p2_win_prob_from_mats(
+    mats: np.ndarray, *,return_ties = True,) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
     Compute P2 win probabilities from a batch of Humble–Nishiyama matrices.
     `mats` shape should be (n_decks, 8, 8), where mats[d, i, j] is P1's score
@@ -160,11 +161,21 @@ def p2_win_prob_from_mats(mats: np.ndarray) -> np.ndarray:
     Returns an 8x8 float array with diagonal set to NaN, where entry [i, j]
     is the fraction of decks for which P2's score > P1's score when P1 picks i
     and P2 picks j. P2's score on a deck for (i, j) equals mats[d, j, i].
+
+    If ``return_ties`` is True, also returns an 8x8 array of tie frequencies.
     """
     if mats.ndim != 3 or mats.shape[1:] != (8, 8):
         raise ValueError("mats must have shape (n, 8, 8)")
     n = mats.shape[0]
-    p2_wins = (mats[:, :, :].transpose(0, 2, 1) > mats).sum(axis=0)  # count decks where mats[:, j, i] > mats[:, i, j]
-    probs = p2_wins / float(n)
-    probs[np.eye(8, dtype=bool)] = np.nan
-    return probs
+    flipped = mats[:, :, :].transpose(0, 2, 1)
+    p2_wins = (flipped > mats).sum(axis=0)
+    win_probs = p2_wins / float(n)
+    win_probs[np.eye(8, dtype=bool)] = np.nan
+
+    if not return_ties:
+        return win_probs
+
+    tie_counts = (flipped == mats).sum(axis=0)
+    tie_probs = tie_counts / float(n)
+    tie_probs[np.eye(8, dtype=bool)] = np.nan
+    return win_probs, tie_probs

@@ -7,7 +7,7 @@ HALF_DECK_SIZE = 26
 
 debug = debugger_factory(show_args=True)
 
-@debug
+@time_and_size
 def get_decks(n_decks: int, 
               seed: int, 
               half_deck_size: int = HALF_DECK_SIZE) -> np.ndarray:
