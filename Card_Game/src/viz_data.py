@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from src.gen_data import deck_from_seed
+from src.gen_data import get_decks
 from src.score_data import p2_win_prob_matrix, p2_win_prob_from_mats, score_humble_nishiyama
 from src.utils import time_and_size
 
@@ -29,7 +29,7 @@ def save_hn_score_heatmap(deck_seed: int = 42, out_dir: str | None = None, filen
     if filename is None:
         filename = f"humble_nishiyama_seed{deck_seed}.png"
 
-    deck = deck_from_seed(deck_seed)
+    deck = get_decks(1, deck_seed)[0]
     m = score_humble_nishiyama(deck)
 
     m_plot = m.astype(float).copy()

@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Tuple
-from src.gen_data import generate_seeds, deck_from_seed
+from src.gen_data import get_decks
 
 def _count_both(deck: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> Tuple[int, int]:
     """
@@ -116,13 +116,12 @@ def p2_win_prob_matrix(n_games: int = 100, base_seed: int = 2024) -> np.ndarray:
     Returns an 8x8 float array with diagonal set to NaN (invalid same-pattern).
     """
     patterns = [np.array([int(b) for b in f"{i:03b}"]) for i in range(8)]
-    seeds = generate_seeds(n_games, base_seed=base_seed)
+    decks = get_decks(n_games, seed=base_seed)
 
     win_sum = np.zeros((8, 8), dtype=int)
     game_cnt = np.zeros((8, 8), dtype=int)
 
-    for s in seeds:
-        deck = deck_from_seed(int(s))
+    for deck in decks:
         for i in range(8):
             for j in range(8):
                 if i == j:
