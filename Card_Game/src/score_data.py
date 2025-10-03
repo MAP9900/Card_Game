@@ -1,5 +1,10 @@
-import numpy as np
+import csv
+from collections.abc import Mapping
+from pathlib import Path
 from typing import Tuple
+
+import numpy as np
+
 from src.gen_data import get_decks
 
 def _count_both(deck: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> Tuple[int, int]:
@@ -125,7 +130,7 @@ def p2_win_prob_matrix(n_games: int = 100, base_seed: int = 2024) -> np.ndarray:
         for i in range(8):
             for j in range(8):
                 if i == j:
-                    continue
+                    continue #Skip diagonal 
                 p1c, p2c = _count_both(deck, patterns[i], patterns[j])
                 game_cnt[i, j] += 1
                 if p2c > p1c:
@@ -178,3 +183,152 @@ def p2_win_prob_from_mats(
     tie_probs = tie_counts / float(n)
     tie_probs[np.eye(8, dtype=bool)] = np.nan
     return win_probs, tie_probs
+
+
+def _load_scores_payload(path: str) -> Mapping[str, np.ndarray] | np.ndarray:
+    """Return either a mapping of score variants or a raw matrix array."""
+
+    obj = np.load(path, allow_pickle=True)
+    try:
+        if isinstance(obj, np.lib.npyio.NpzFile):
+            #Materialize to a standard dict so the file can be safely closed.
+            return {key: obj[key] for key in obj.files}
+
+        if isinstance(obj, np.ndarray) and obj.dtype == object:
+            try:
+                candidate = obj.item()
+            except ValueError as exc:  # pragma: no cover - defensive guard
+                raise ValueError(
+                    "Object array must contain a single mapping with score entries"
+                ) from exc
+            if isinstance(candidate, Mapping):
+                return candidate
+        return np.asarray(obj)
+    finally:
+        if isinstance(obj, np.lib.npyio.NpzFile):
+            obj.close()
+
+
+def _resolve_score_array(
+    payload: Mapping[str, np.ndarray] | np.ndarray, *, key: str,)-> np.ndarray | None:
+    """Extract an array from a payload, returning ``None`` if the key is absent."""
+
+    if isinstance(payload, Mapping):
+        if key not in payload:
+            return None
+        return np.asarray(payload[key])
+    return np.asarray(payload) if key == "score_humble_nishiyama" else None
+
+
+def export_hn_scores_to_csv(
+    scores_file: str,
+    *,
+    cards_scores_file: str | None = None,
+    out_csv: str | None = None,) -> str:
+    """
+    Convert scores to CSV file. 
+    Counts also p1 win's to check if wins, losses, and ties adds up to n
+    """
+
+    payload = _load_scores_payload(scores_file)
+    tricks = _resolve_score_array(payload, key="score_humble_nishiyama")
+    cards = _resolve_score_array(payload, key="score_humble_nishiyama_cards")
+
+    if tricks is None:
+        raise ValueError(
+            "Could not locate 'score_humble_nishiyama' matrices in the supplied file"
+        )
+
+    if cards is None:
+        if cards_scores_file is None:
+            raise ValueError(
+                "Card-count matrices missing. Provide 'cards_scores_file' or bundle "
+                "them alongside the trick-count data."
+            )
+        secondary_payload = _load_scores_payload(cards_scores_file)
+        cards = _resolve_score_array(
+            secondary_payload, key="score_humble_nishiyama_cards"
+        )
+        if cards is None:
+            cards = _resolve_score_array(
+                secondary_payload, key="score_humble_nishiyama"
+            )
+            if cards is None:
+                raise ValueError(
+                    "Could not locate card-count matrices in supplemental file"
+                )
+
+    if tricks.shape != cards.shape:
+        raise ValueError(
+            "Score matrices for tricks and cards must have identical shapes; "
+            f"received {tricks.shape} vs {cards.shape}."
+        )
+    if tricks.ndim != 3 or tricks.shape[1] != tricks.shape[2]:
+        raise ValueError(
+            "Score matrices must have shape (n_decks, 8, 8) with square matchup grids."
+        )
+
+    n_decks, n_patterns, _ = tricks.shape
+    bit_width = max(1, len(format(n_patterns - 1, "b")))
+    pattern_labels = [format(idx, f"0{bit_width}b") for idx in range(n_patterns)]
+
+    base_path = Path(scores_file)
+    out_path = Path(out_csv) if out_csv is not None else base_path.with_name(
+        f"{base_path.stem}_summary.csv"
+    )
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    headers = [
+        "deck_index",
+        "p1_index",
+        "p1_pattern",
+        "p2_index",
+        "p2_pattern",
+        "deck_count",
+        "score_humble_nishiyama_p1_wins",
+        "score_humble_nishiyama_p2_wins",
+        "score_humble_nishiyama_draws",
+        "score_humble_nishiyama_cards_p1_wins",
+        "score_humble_nishiyama_cards_p2_wins",
+        "score_humble_nishiyama_cards_draws",
+    ]
+
+    with out_path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(headers)
+
+        for p1_idx in range(n_patterns):
+            for p2_idx in range(n_patterns):
+                if p1_idx == p2_idx:
+                    continue
+
+                trick_p1 = tricks[:, p1_idx, p2_idx]
+                trick_p2 = tricks[:, p2_idx, p1_idx]
+                cards_p1 = cards[:, p1_idx, p2_idx]
+                cards_p2 = cards[:, p2_idx, p1_idx]
+
+                trick_p1_wins = int(np.sum(trick_p1 > trick_p2))
+                trick_p2_wins = int(np.sum(trick_p2 > trick_p1))
+                trick_draws = int(np.sum(trick_p1 == trick_p2))
+
+                cards_p1_wins = int(np.sum(cards_p1 > cards_p2))
+                cards_p2_wins = int(np.sum(cards_p2 > cards_p1))
+                cards_draws = int(np.sum(cards_p1 == cards_p2))
+
+                writer.writerow(
+                    [
+                        p1_idx,
+                        pattern_labels[p1_idx],
+                        p2_idx,
+                        pattern_labels[p2_idx],
+                        n_decks,
+                        trick_p1_wins,
+                        trick_p2_wins,
+                        trick_draws,
+                        cards_p1_wins,
+                        cards_p2_wins,
+                        cards_draws,
+                    ]
+                )
+
+    return str(out_path)
