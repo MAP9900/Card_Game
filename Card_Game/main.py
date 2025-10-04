@@ -13,6 +13,8 @@ from src.score_data import score_humble_nishiyama
 from src.viz_data import save_p2_win_prob_heatmap_from_mats
 
 
+#NOT up tp date, use run_tests.py to get accurate results
+
 def data_dir() -> str:
     base_dir = os.path.dirname(__file__)
     d = os.path.join(base_dir, "data")

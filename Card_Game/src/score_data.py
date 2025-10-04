@@ -7,7 +7,7 @@ from src.gen_data import get_decks
 
 #Way 2 to score decks
 
-def _count_both(deck: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> Tuple[int, int]:
+def score_tricks(deck: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> Tuple[int, int]:
     """
     Count how many tricks P1 and P2 take on a single deck given their 3-bit patterns.
     Returns (p1_count, p2_count).
@@ -28,8 +28,11 @@ def _count_both(deck: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> Tuple[int, 
     return p1c, p2c
 
 
-def _count_cards(deck: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> Tuple[int, int]:
-    """Return card totals awarded to each player using the "pot" scoring variant."""
+def score_cards(deck: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> Tuple[int, int]:
+    """
+    Return card totals awarded to each player using the pot scoring variant
+    Returns (p1_count, p2_count).
+    """
     p1_cards = 0 #p1 card totals
     p2_cards = 0 #p2 card totals
     pot_start = 0 
@@ -73,7 +76,7 @@ def score_humble_nishiyama(deck: np.ndarray, *, return_ties: bool = False) -> np
         for j, p2 in enumerate(patterns):
             if i == j:
                 continue
-            p1c, p2c = _count_both(deck, p1, p2)
+            p1c, p2c = score_tricks(deck, p1, p2)
             scores[i, j] = p1c 
             if return_ties:
                 tie_flags[i, j] = int(p1c == p2c) #ties 
@@ -104,7 +107,7 @@ def score_humble_nishiyama_cards(deck: np.ndarray,*,
         for j, p2 in enumerate(patterns):
             if i == j:
                 continue #skip diagonal 
-            p1_cards, p2_cards = _count_cards(deck, p1, p2)
+            p1_cards, p2_cards = score_cards(deck, p1, p2)
             scores[i, j] = p1_cards 
             if return_ties:
                 tie_flags[i, j] = int(p1_cards == p2_cards) #ties
