@@ -2,50 +2,49 @@ import csv
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Tuple
-
 import numpy as np
-
 from src.gen_data import get_decks
+
+#Way 2 to score decks
 
 def _count_both(deck: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> Tuple[int, int]:
     """
     Count how many tricks P1 and P2 take on a single deck given their 3-bit patterns.
     Returns (p1_count, p2_count).
     """
-    p1c = 0
-    p2c = 0
-    idx = 0
-    while idx <= 49:
-        window = deck[idx:idx+3]
-        if np.array_equal(window, p1):
-            p1c += 1
-            idx += 3
-        elif np.array_equal(window, p2):
+    p1c = 0 #p1 trick count
+    p2c = 0 #p2 trick count
+    idx = 0 #deck index
+    while idx <= 49: #Can not score if less than 3 cards remaining
+        window = deck[idx:idx+3] #Move deck forward by three
+        if np.array_equal(window, p1): #Check if to see if sequence matches p1s 
+            p1c += 1 #add to p1 count
+            idx += 3 #move foward
+        elif np.array_equal(window, p2): #Check if to see if sequence matches p2s
             p2c += 1
             idx += 3
         else:
-            idx += 1
+            idx += 1 #Move deck forward by one if no matches 
     return p1c, p2c
 
 
 def _count_cards(deck: np.ndarray, p1: np.ndarray, p2: np.ndarray) -> Tuple[int, int]:
     """Return card totals awarded to each player using the "pot" scoring variant."""
-    p1_cards = 0
-    p2_cards = 0
-    pot_start = 0
-
-    for idx in range(deck.shape[0]):
-        pot_size = idx - pot_start + 1
-        if pot_size < 3:
-            continue
-        window = deck[idx-2:idx+1]
-        if np.array_equal(window, p1):
-            p1_cards += pot_size
-            pot_start = idx + 1
-        elif np.array_equal(window, p2):
-            p2_cards += pot_size
-            pot_start = idx + 1
-
+    p1_cards = 0 #p1 card totals
+    p2_cards = 0 #p2 card totals
+    pot_start = 0 
+    idx = 0 #starting index
+    while idx < deck.shape[0]:
+        pot_size = idx - pot_start + 1 #number of cards since last win
+        if pot_size >= 3:
+            window = deck[idx-2:idx+1] #last 3 cards
+            if np.array_equal(window, p1):
+                p1_cards += pot_size #award whole pot to P1
+                pot_start = idx + 1 #reset pot start
+            elif np.array_equal(window, p2):
+                p2_cards += pot_size #award whole pot to P2
+                pot_start = idx + 1
+        idx += 1 #move deck up by one
     return p1_cards, p2_cards
 
 
@@ -55,29 +54,29 @@ def score_humble_nishiyama(deck: np.ndarray, *, return_ties: bool = False) -> np
     Each player picks a 3-card pattern (000–111); flip the deck and score
     one trick when a match occurs. Diagonal (same-pattern) is invalid (-1).
 
-    Returns:
     scores : np.ndarray
         Matrix where scores[i, j] is P1's trick count when P1 uses pattern i
-        against P2 pattern j.
+        against P2 pattern j. Can get p2 win counts by doing the inverse of the matrix. 
     ties : np.ndarray, optional
         If ``return_ties`` is True, also return an 8x8 matrix flagging ties
         (1 for tie, 0 for decisive result, -1 on the diagonal).
     """
-    assert deck.shape == (52,)
+    assert deck.shape == (52,) #Check deck is correct
     assert np.sum(deck) == 26
 
+    #Generate all 56 player choices 
     patterns = [np.array([int(b) for b in f"{i:03b}"]) for i in range(8)]
     scores = np.full((8, 8), -1, dtype=np.int16)
     tie_flags = np.full((8, 8), -1, dtype=np.int16) if return_ties else None
-
+    #Loop over all p1 vs p2 matchups
     for i, p1 in enumerate(patterns):
         for j, p2 in enumerate(patterns):
             if i == j:
                 continue
             p1c, p2c = _count_both(deck, p1, p2)
-            scores[i, j] = p1c
+            scores[i, j] = p1c 
             if return_ties:
-                tie_flags[i, j] = int(p1c == p2c)
+                tie_flags[i, j] = int(p1c == p2c) #ties 
 
     if return_ties:
         return scores, tie_flags
@@ -90,23 +89,25 @@ def score_humble_nishiyama_cards(deck: np.ndarray,*,
     Variant of the Humble–Nishiyama score that tracks total cards collected.
 
     Whenever a player's pattern appears, they claim every card flipped since the
-    previous win (inclusive). The diagonal remains invalid (-1).
+    previous win (inclusive). The diagonal remains invalid (-1). 
+    Counts p1 wins and ties. P2 wins are inverse of the score matrix. 
     """
-    assert deck.shape == (52,)
+    assert deck.shape == (52,) #Check deck is correct 
     assert np.sum(deck) == 26
 
+    #Generate all 56 player choices 
     patterns = [np.array([int(b) for b in f"{i:03b}"]) for i in range(8)]
     scores = np.full((8, 8), -1, dtype=np.int16)
     tie_flags = np.full((8, 8), -1, dtype=np.int16) if return_ties else None
-
+    #Loop over all p1 vs p2 matchups
     for i, p1 in enumerate(patterns):
         for j, p2 in enumerate(patterns):
             if i == j:
-                continue
+                continue #skip diagonal 
             p1_cards, p2_cards = _count_cards(deck, p1, p2)
-            scores[i, j] = p1_cards
+            scores[i, j] = p1_cards 
             if return_ties:
-                tie_flags[i, j] = int(p1_cards == p2_cards)
+                tie_flags[i, j] = int(p1_cards == p2_cards) #ties
 
     if return_ties:
         return scores, tie_flags
@@ -220,11 +221,8 @@ def _resolve_score_array(
     return np.asarray(payload) if key == "score_humble_nishiyama" else None
 
 
-def export_hn_scores_to_csv(
-    scores_file: str,
-    *,
-    cards_scores_file: str | None = None,
-    out_csv: str | None = None,) -> str:
+def export_hn_scores_to_csv(scores_file: str, *, cards_scores_file: str | None = None, 
+                            out_csv: str | None = None,) -> str:
     """
     Convert scores to CSV file. 
     Counts also p1 win's to check if wins, losses, and ties adds up to n

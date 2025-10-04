@@ -1,14 +1,15 @@
+#Imports
 import os
 import numpy as np
-
 from src.gen_data import get_decks, save_decks
 from src.score_data import (
     export_hn_scores_to_csv,
     score_humble_nishiyama,
-    score_humble_nishiyama_cards,
-)
+    score_humble_nishiyama_cards,)
 from src.viz_data import save_p2_win_prob_heatmap_from_mats
 
+
+#Runs tests for generating decks and scoring from score_data.py. Also saves scores to csv and creates test heatmaps. 
 
 def _data_dir() -> str:
     base_dir = os.path.dirname(os.path.dirname(__file__))
@@ -24,7 +25,7 @@ def _save_scores(array: np.ndarray, filename: str) -> str:
 
 
 def main() -> None:
-    n_decks = 150
+    n_decks = 150 #Can be changed
     seed = 2024
 
     decks = get_decks(n_decks, seed)
