@@ -24,7 +24,6 @@ def save_p2_win_prob_heatmap_from_counts(win_counts: np.ndarray, tie_counts: np.
     This avoids materializing all score matrices when the deck count is extremely large.
     """
     
-
     if out_dir is None:
         out_dir = _default_fig_dir()
     if filename is None:
@@ -45,8 +44,7 @@ def save_p2_win_prob_heatmap_from_counts(win_counts: np.ndarray, tie_counts: np.
     plt.figure(figsize=(6.5, 5.5))
     im = plt.imshow(
         np.ma.masked_invalid(win_probs), vmin=0.0, vmax=1.0,
-        cmap=cmap, interpolation='nearest'
-    )
+        cmap=cmap, interpolation='nearest')
     plt.colorbar(im, label='P2 win probability (per deck)')
 
     ticks = list(range(8))
