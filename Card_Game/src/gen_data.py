@@ -26,31 +26,6 @@ def get_decks(n_decks: int,
     rng.permuted(decks, axis=1, out=decks)
     return decks
 
-@time_and_size
-def save_decks(decks: np.ndarray, 
-               seed: int, 
-               batch_size: int = 100_000,
-               filename: str = "decks_batch.npy"):
-    """
-    Saves decks and the seed used to PATH_DATA.
-    """
-    os.makedirs(PATH_DATA, exist_ok=True)
-    saved_files = []
-    num_batches = (len(decks) + batch_size - 1) // batch_size
-    for i in range(num_batches):
-        batch = decks[i * batch_size:(i + 1) * batch_size]
-        batch_filename = f"{filename}_{i}.npy"
-        batch_path = os.path.join(PATH_DATA, batch_filename)
-        np.save(batch_path, batch)
-        print(f"Saved chunk {i + 1}/{num_batches} to {batch_path}")
-        saved_files.append(batch_path)
-    
-    # Save the seed for reproducibility
-    seed_file = os.path.join(PATH_DATA, "decks_seed.npy")
-    np.save(seed_file, np.array([seed], dtype=np.uint64))
-    print(f"Saved seed to {seed_file}")
-    saved_files.append(seed_file)
-    return saved_files
 
 def load_decks(filename: str = "decks.npy"):
     """
@@ -65,6 +40,36 @@ def load_decks(filename: str = "decks.npy"):
 
 
 
+
+#Archived Functions:
+
+
+
+# @time_and_size
+# def save_decks(decks: np.ndarray, 
+#                seed: int, 
+#                batch_size: int = 100_000,
+#                filename: str = "decks_batch.npy"):
+#     """
+#     Saves decks and the seed used to PATH_DATA.
+#     """
+#     os.makedirs(PATH_DATA, exist_ok=True)
+#     saved_files = []
+#     num_batches = (len(decks) + batch_size - 1) // batch_size
+#     for i in range(num_batches):
+#         batch = decks[i * batch_size:(i + 1) * batch_size]
+#         batch_filename = f"{filename}_{i}.npy"
+#         batch_path = os.path.join(PATH_DATA, batch_filename)
+#         np.save(batch_path, batch)
+#         print(f"Saved chunk {i + 1}/{num_batches} to {batch_path}")
+#         saved_files.append(batch_path)
+    
+#     # Save the seed for reproducibility
+#     seed_file = os.path.join(PATH_DATA, "decks_seed.npy")
+#     np.save(seed_file, np.array([seed], dtype=np.uint64))
+#     print(f"Saved seed to {seed_file}")
+#     saved_files.append(seed_file)
+#     return saved_files
 
 
 
