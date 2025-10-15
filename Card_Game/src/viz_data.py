@@ -99,6 +99,76 @@ def save_p2_win_prob_heatmap_from_mats(mats: np.ndarray, out_dir: str | None = N
     return out_path
 
 
+@time_and_size
+def save_p2_win_prob_heatmap_from_counts(
+    win_counts: np.ndarray,
+    tie_counts: np.ndarray,
+    total_decks: int,
+    *,
+    out_dir: str | None = None,
+    filename: str | None = None,
+    title: str | None = None,
+) -> str:
+    """
+    Save a P2 win probability heatmap using aggregated win/tie counts instead of raw matrices.
+    This avoids materializing all score matrices when the deck count is extremely large.
+    """
+    if total_decks <= 0:
+        raise ValueError("total_decks must be a positive integer.")
+
+    if win_counts.shape != tie_counts.shape:
+        raise ValueError("win_counts and tie_counts must have the same shape.")
+
+    if win_counts.shape != (8, 8):
+        raise ValueError("Expected 8x8 win/tie matrices for Humble–Nishiyama patterns.")
+
+    if out_dir is None:
+        out_dir = _default_fig_dir()
+    if filename is None:
+        filename = "humble_nishiyama_p2_win_prob_from_counts.png"
+    if title is None:
+        title = f"Humble–Nishiyama P2 Win Probabilities (n={total_decks})"
+
+    win_probs = win_counts.astype(np.float64) / float(total_decks)
+    tie_probs = tie_counts.astype(np.float64) / float(total_decks)
+
+    diag_mask = np.eye(win_counts.shape[0], dtype=bool)
+    win_probs[diag_mask] = np.nan
+    tie_probs[diag_mask] = np.nan
+
+    cmap = plt.cm.plasma.copy()
+    cmap.set_bad(color='lightgray')
+
+    plt.figure(figsize=(6.5, 5.5))
+    im = plt.imshow(
+        np.ma.masked_invalid(win_probs), vmin=0.0, vmax=1.0,
+        cmap=cmap, interpolation='nearest'
+    )
+    plt.colorbar(im, label='P2 win probability (per deck)')
+
+    ticks = list(range(8))
+    labels = [format(i, '03b') for i in range(8)]
+    plt.xticks(ticks, labels)
+    plt.yticks(ticks, labels)
+    plt.xlabel('P2 Pattern (000 - 111)')
+    plt.ylabel('P1 Pattern (000 - 111)')
+    plt.title(title)
+
+    for i in range(8):
+        for j in range(8):
+            if i == j or np.isnan(win_probs[i, j]):
+                continue
+            win_pct = int(round(win_probs[i, j] * 100))
+            tie_pct = int(round(tie_probs[i, j] * 100)) if not np.isnan(tie_probs[i, j]) else 0
+            plt.text(j, i, f"{win_pct}({tie_pct})", ha='center', va='center', color='black', fontsize=8)
+
+    out_path = os.path.join(out_dir, filename)
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+    return out_path
+
+
 #Extra Viz Functions
 
 # #Runs monte carlo sims on new games. (n_games = ...) Used to regenerate probabilties on the fly. 
