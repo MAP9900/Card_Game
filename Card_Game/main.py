@@ -73,7 +73,7 @@ def _next_auto_batch_index() -> int:
     return max_idx + 1
 
 #User Input Fucntion:
-def _prompt_manual_decks() -> np.ndarray:
+def augment_data() -> np.ndarray:
     try:
         raw_count = input("How many additional decks would you like to add? (0 to skip): ").strip()
     except EOFError:
@@ -206,7 +206,7 @@ def main() -> None:
     current_total, counts = _load_summary()
     new_auto, updated_total = _score_generated_decks(counts, current_total)
 
-    manual_decks = _prompt_manual_decks()
+    manual_decks = augment_data()
     if manual_decks.size:
         _score_batch(manual_decks, counts)
 
