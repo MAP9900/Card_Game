@@ -1,4 +1,15 @@
-**To run the card game simulator:**
+# Read Me
 
-uv sync <br>
-uv run main.py -- Will start augment_data() which checks if the number of scored decks is less N_DECKS and will score any remaining decks. Then prompts the user to add new decks or to skip. If new decks are wanted, will score and then add to the summary and produce the updated heatmaps. 
+## Purpose
+
+## Quick Start Guide:
+
+The Card Game Project is managed using UV. To check if UV is installed run uv in terminal. If successfully installed, the uv help and command menu will appear. Otherwise, follow the install guidelines on UV's website: https://docs.astral.sh/uv/guides/install-python/ 
+<br>
+With UV properly installed, download this repository and once navigated to the directory, run uv sync to install Card_Game dependencies. 
+<br>
+To run Card Game: uv run main.py
+<br>
+Running the program will score any un-scored decks and then start the user interface where the user may choose to add new decks to the running total. The user may also give a specific seed for the new decks or skip, defaulting to a random seed. 
+
+## Contents 
