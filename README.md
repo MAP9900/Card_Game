@@ -1,6 +1,30 @@
 # Read Me
 
-## Purpose
+### Highlights
+
+* **Game Foundation:** Two players select one of eight possible 3-card binary patterns, and the winner is the player whose pattern appears most frequently in a 52-card deck.
+* **The Penney's Game Bias:** The card game fundamentally originates in the Penney's Game; for any pattern P1 chooses, P2 can always choose a different pattern that has a more favorable probability of winning. 
+* **The Simulated Scoring Variants:**
+    * **Trick-Counting:** Players win a 'trick' every time their pattern appears in a non-overlapping manner. Simulations confirm P2 maintains the advantage, meaning P2 can always find a winning counter-strategy.
+    * **Card-Counting:** When a players pattern matches the sequence, they win all the cards since the last pattern match.
+* **Winning the Variants:** The advantage for P2 is minimally weakened by the card-counting variant according the the simulation, yet P2 still experiences the bias. 
+
+## Card Game Environment
+
+This repository simulates and analyzes a card game based on the Humble–Nishiyama Game with focus on how different scoring methods impact the optimal strategy for P2. The simulation utilizes two players each selecting a pattern represented as 3-bit binary strings. The players try to match the patterns in a shuffled 52-card deck and collect points through matches. Through five million deck simulations, the project compares the original trick-counting method with a card-counting variant, demonstrating a slight difference.
+
+### Overview
+#### 1. Trick-Counting
+
+In this variant, the deck is scanned for patterns, and the first match wins a 'trick'. The pattern match scans three cards in advance to avoid pattern overlap, and the player with the most tricks at the end wins the game.
+
+* **P2 Strategy:** Consistent with the original nature of the Humble–Nishiyama Game, the simulation shows that P2 can always identify a pattern that yields a winning probability against any of P1's eight choices. The resulting 'By Tricks' heatmap clearly illustrates this strategic landscape.
+
+#### 2. Card-Counting 
+
+In this variant, the pot of cards grows with each card revealed. The player whose pattern matches is awarded all the cards currently in the pot, and the pot resets to zero. The player with the highest total of cards at the end wins.
+
+* **P2 Strategy:** The shift from winning a fixed trick to winning a variable pot of cards alters the optimal strategy. The simulation demonstrates that the best choice for P2 in the trick-counting game is not necessarily the best in the card-counting game. The 'By Cards' heatmap highlights this strategic difference and reveals different winning probabilities with a change in one optimal choice.
 
 ## Quick Start Guide:
 
