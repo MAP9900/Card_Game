@@ -4,7 +4,7 @@
 
 ## Quick Start Guide:
 
-The Card Game Project is managed using UV. To check if UV is installed run uv in terminal. If successfully installed, the uv help and command menu will appear. Otherwise, follow the install guidelines on UV's website: https://docs.astral.sh/uv/guides/install-python/ 
+The Card Game Project is managed using [UV](https://docs.astral.sh/uv/guides/install-python/). To check if UV is installed run uv in terminal. If successfully installed, the uv help and command menu will appear. Otherwise, follow the install guidelines on [UV's website](https://docs.astral.sh/uv/guides/install-python/).
 <br>
 With UV properly installed, download this repository and once navigated to the directory, run uv sync to install Card_Game dependencies. 
 <br>
