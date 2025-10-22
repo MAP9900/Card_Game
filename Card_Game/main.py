@@ -149,7 +149,6 @@ def _score_batch(decks: np.ndarray, counts: dict[str, np.ndarray]) -> None:
         counts["card_ties"] += card_ties
 
 
-
 def _score_generated_decks(counts: dict[str, np.ndarray], current_total: int) -> tuple[int, int]:
     #Avoid Rescoring the same decks
     if N_DECKS <= current_total:
@@ -176,7 +175,6 @@ def _score_generated_decks(counts: dict[str, np.ndarray], current_total: int) ->
 
     return produced, current_total + produced
 
-
 def _build_heatmaps(total_decks: int, counts: dict[str, np.ndarray]) -> None:
     if total_decks == 0: #Safety Check
         print("No decks scored. Skipping heatmaps.")
@@ -199,7 +197,6 @@ def _build_heatmaps(total_decks: int, counts: dict[str, np.ndarray]) -> None:
     print("Tricks heatmap saved as:", tricks_fig)
     print("Cards heatmap saved as:", cards_fig)
 
-
 def main() -> None:
     _ensure_dirs()
 
@@ -218,7 +215,6 @@ def main() -> None:
     print(f"Saved summary to {SUMMARY_FILE}")
 
     _build_heatmaps(total_decks, counts)
-
 
 if __name__ == "__main__":
     main()
